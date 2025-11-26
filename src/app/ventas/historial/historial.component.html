@@ -1,1 +1,67 @@
-<p>historial works!</p>
+<h2>Historial de Ventas</h2>
+
+<div *ngIf="loading">Cargando ventas...</div>
+
+<!-- TABLA DE VENTAS -->
+<table border="1" width="100%" *ngIf="!loading">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Fecha</th>
+      <th>Cliente</th>
+      <th>Comprobante</th>
+      <th>Total</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let v of ventas">
+      <td>{{ v.id_venta }}</td>
+      <td>{{ v.fecha | date:'short' }}</td>
+      <td>{{ v.clientes?.nombre || 'Sin cliente' }}</td>
+      <td>{{ v.tipo_comprobante }} {{ v.nro_comprobante }}</td>
+      <td>S/. {{ v.total }}</td>
+      <td>
+        <button (click)="verDetalle(v)">👁️ Ver detalle</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- =========================================
+     DETALLE DE LA VENTA (tipo modal simple)
+     ========================================= -->
+<div *ngIf="mostrandoDetalle" 
+     style="margin-top:20px; padding:1rem; border:2px solid #444; background:#fafafa;">
+
+  <h3>Detalle de Venta #{{ ventaSeleccionada.id_venta }}</h3>
+
+  <p><strong>Cliente:</strong> {{ ventaSeleccionada.clientes?.nombre }}</p>
+  <p><strong>Fecha:</strong> {{ ventaSeleccionada.fecha | date:'short' }}</p>
+  <p><strong>Total:</strong> S/. {{ ventaSeleccionada.total }}</p>
+
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Cant.</th>
+        <th>Precio</th>
+        <th>Desc.</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let d of detalle">
+        <td>{{ d.productos?.nombre }}</td>
+        <td>{{ d.cantidad }}</td>
+        <td>{{ d.precio_unitario }}</td>
+        <td>{{ d.descuento }}</td>
+        <td>{{ d.subtotal }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button style="margin-top:10px;" (click)="cerrarDetalle()">Cerrar</button>
+</div>

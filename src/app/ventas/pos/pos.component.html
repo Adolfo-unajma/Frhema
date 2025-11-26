@@ -1,1 +1,81 @@
-<p>pos works!</p>
+<h2>POS - Punto de Venta</h2>
+
+<!-- DATOS DE VENTA -->
+<div style="border:1px solid #ccc; padding:1rem; margin-bottom:20px;">
+  
+  <label>Cliente:</label>
+  <select [(ngModel)]="venta.id_cliente">
+    <option value="0">Seleccione cliente</option>
+    <option *ngFor="let c of clientes" [value]="c.id_cliente">
+      {{ c.nombre }}
+    </option>
+  </select>
+
+  <label>Comprobante:</label>
+  <select [(ngModel)]="venta.tipo_comprobante">
+    <option>Boleta</option>
+    <option>Factura</option>
+  </select>
+
+  <label>N° Comprobante:</label>
+  <input type="text" [(ngModel)]="venta.nro_comprobante" />
+
+  <label>Método de pago:</label>
+  <select [(ngModel)]="venta.metodo_pago">
+    <option>Efectivo</option>
+    <option>Tarjeta</option>
+    <option>Transferencia</option>
+  </select>
+
+</div>
+
+<!-- FORMULARIO DE PRODUCTO -->
+<h3>Agregar Producto</h3>
+
+<div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+
+  <select [(ngModel)]="formProducto.id_producto">
+    <option value="0">Producto</option>
+    <option *ngFor="let p of productos" [value]="p.id_producto">
+      {{ p.nombre }} — S/. {{ p.precio_unitario }}
+    </option>
+  </select>
+
+  <input type="number" min="1" [(ngModel)]="formProducto.cantidad" placeholder="Cant." />
+
+  <input type="number" min="0" [(ngModel)]="formProducto.descuento" placeholder="Desc." />
+
+  <button (click)="agregarProducto()">Agregar</button>
+
+</div>
+
+<!-- TABLA DEL CARRITO -->
+<table border="1" width="100%" style="margin-top:20px;">
+  <thead>
+    <tr>
+      <th>Producto</th>
+      <th>Cant.</th>
+      <th>Precio</th>
+      <th>Desc.</th>
+      <th>Subtotal</th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let d of carrito; let i = index">
+      <td>{{ getNombreProducto(d.id_producto) }}</td>
+      <td>{{ d.cantidad }}</td>
+      <td>{{ d.precio_unitario }}</td>
+      <td>{{ d.descuento }}</td>
+      <td>{{ d.subtotal }}</td>
+      <td>
+        <button (click)="eliminar(i)">🗑️</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Total: S/. {{ venta.total }}</h2>
+
+<button (click)="procesarVenta()">Procesar Venta</button>
