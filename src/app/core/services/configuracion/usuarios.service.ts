@@ -1,20 +1,21 @@
 import { Injectable } from '@angular/core';
 import { SupabaseClientService } from '../auth/supabase.client';
 import { Usuario } from '../../models/usuario.model';
+import { Rol } from '../../models/rol.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuariosService {
 
-  private TABLE = 'usuarios';
+  private readonly TABLE = 'usuarios';
 
   constructor(private supabase: SupabaseClientService) {}
 
-  // ==================================
-  // LISTAR USUARIOS (JOIN ROL)
-  // ==================================
-  async getUsuarios() {
+  // ============================
+  // LISTAR USUARIOS + ROL
+  // ============================
+  async getUsuarios(): Promise<(Usuario & { roles?: Rol | null })[]> {
     const { data, error } = await this.supabase.client
       .from(this.TABLE)
       .select(`
@@ -22,69 +23,28 @@ export class UsuariosService {
         nombre_usuario,
         nombre,
         apellido,
-        roles ( id_rol, nombre_rol )
-      `);
+        id_rol,
+        roles (
+          id_rol,
+          nombre_rol
+        )
+      `)
+      .order('nombre_usuario', { ascending: true });
 
     if (error) throw error;
-    return data;
+    return data as any;
   }
 
-  // ==================================
-  // CREAR USUARIO
-  // ==================================
-  async addUsuario(u: Usuario, password: string) {
-
-    // Crear user en auth.users
-    const { data: auth, error: authError } = await this.supabase.client.auth.signUp({
-      email: u.nombre_usuario,
-      password: password
-    });
-
-    if (authError) throw authError;
-
-    const uid = auth.user?.id!;
-    
-    // Crear registro en tabla usuarios
+  // ============================
+  // ACTUALIZAR ROL DE USUARIO
+  // ============================
+  async actualizarRolUsuario(id_usuario: string, id_rol: number | null) {
     const { error } = await this.supabase.client
       .from(this.TABLE)
-      .insert([
-        {
-          id_usuario: uid,
-          nombre_usuario: u.nombre_usuario,
-          id_rol: u.id_rol,
-          nombre: u.nombre,
-          apellido: u.apellido
-        }
-      ]);
+      .update({ id_rol })
+      .eq('id_usuario', id_usuario);
 
     if (error) throw error;
-  }
-
-  // ==================================
-  // ACTUALIZAR USUARIO
-  // ==================================
-  async updateUsuario(id: string, u: Usuario) {
-    const { error } = await this.supabase.client
-      .from(this.TABLE)
-      .update({
-        nombre_usuario: u.nombre_usuario,
-        id_rol: u.id_rol,
-        nombre: u.nombre,
-        apellido: u.apellido
-      })
-      .eq('id_usuario', id);
-
-    if (error) throw error;
-  }
-
-  // ==================================
-  // ELIMINAR USUARIO (auth + tabla)
-  // ==================================
-  async deleteUsuario(id: string) {
-    // borrar tabla usuarios
-    await this.supabase.client.from(this.TABLE).delete().eq('id_usuario', id);
-
-    // borrar auth.users
-    await this.supabase.client.auth.admin.deleteUser(id);
+    return true;
   }
 }

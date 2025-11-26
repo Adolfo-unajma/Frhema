@@ -1,1 +1,36 @@
-<p>usuarios works!</p>
+<h2>Gestión de Usuarios y Roles</h2>
+
+<div *ngIf="loading">Cargando usuarios...</div>
+
+<table *ngIf="!loading" border="1" width="100%">
+  <thead>
+    <tr>
+      <th>Usuario</th>
+      <th>Nombre</th>
+      <th>Apellido</th>
+      <th>Rol actual</th>
+      <th>Asignar rol</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let u of usuarios">
+      <td>{{ u.nombre_usuario }}</td>
+      <td>{{ u.nombre }}</td>
+      <td>{{ u.apellido }}</td>
+      <td>{{ u.roles?.nombre_rol || 'SIN ROL' }}</td>
+      <td>
+        <select [(ngModel)]="u.id_rol">
+          <option [ngValue]="null">SIN ROL</option>
+          <option *ngFor="let r of roles" [ngValue]="r.id_rol">
+            {{ r.nombre_rol }}
+          </option>
+        </select>
+      </td>
+      <td>
+        <button (click)="guardarRol(u)">Guardar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

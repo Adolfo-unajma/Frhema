@@ -88,9 +88,11 @@ export class AuthService {
   ) {}
 
   // ============================
-  // LOGIN
+  // LOGIN CORRECTO CON ROLES
   // ============================
   async login(email: string, password: string) {
+
+    // 1️⃣ LOGIN en auth.users
     const { data, error } = await this.supabaseService.client.auth.signInWithPassword({
       email,
       password
@@ -98,17 +100,28 @@ export class AuthService {
 
     if (error) throw error;
 
-    // GUARDAR SESSION COMPLETA
-    localStorage.setItem('session', JSON.stringify(data.session));
+    const user = data.user;
 
-    // GUARDAR TOKEN (opcional)
-    localStorage.setItem('token', data.session.access_token);
+    // 2️⃣ OBTENER PERFIL DE TABLA "usuarios"
+    const { data: perfil, error: e2 } = await this.supabaseService.client
+      .from("usuarios")
+      .select("id_rol")
+      .eq("id_usuario", user.id)
+      .single();
 
-    // ⭐⭐⭐ GUARDAR USER_ID NECESARIO PARA VENTAS/COMPRAS
-    localStorage.setItem('user_id', data.user.id);
+    if (e2 || !perfil) throw new Error("Usuario sin rol asignado.");
+
+    // 3️⃣ GUARDAR SESSION
+    localStorage.setItem("session", JSON.stringify(data.session));
+    localStorage.setItem("token", data.session.access_token);
+    localStorage.setItem("user_id", user.id);
+
+    // 4️⃣ GUARDAR ROL EN LOCALSTORAGE (🔴 ESTO FALTABA)
+    localStorage.setItem("rol", perfil.id_rol.toString());
 
     return data.session;
   }
+
 
   // ============================
   // REGISTER

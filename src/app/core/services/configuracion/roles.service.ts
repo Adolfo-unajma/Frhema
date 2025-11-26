@@ -7,7 +7,7 @@ import { Rol } from '../../models/rol.model';
 })
 export class RolesService {
 
-  private TABLE = 'roles';
+  private readonly TABLE = 'roles';
 
   constructor(private supabase: SupabaseClientService) {}
 
@@ -15,7 +15,7 @@ export class RolesService {
     const { data, error } = await this.supabase.client
       .from(this.TABLE)
       .select('*')
-      .order('id_rol');
+      .order('id_rol', { ascending: true });
 
     if (error) throw error;
     return data as Rol[];

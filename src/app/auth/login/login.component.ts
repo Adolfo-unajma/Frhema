@@ -25,7 +25,8 @@ export class LoginComponent {
       await this.authService.login(this.email, this.password);
       this.router.navigate(['/dashboard']);
     } catch (err: any) {
-      this.errorMessage = err.message;
+      this.errorMessage = "Credenciales incorrectas o usuario sin rol.";
     }
   }
+
 }

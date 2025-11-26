@@ -1,10 +1,11 @@
+<!--
 <nav style="padding: 1rem; background: #f3f3f3; display:flex; gap:1rem;">
   <a routerLink="/dashboard">Inicio</a>
   <a routerLink="/dashboard/productos">Productos</a>
   <a routerLink="/dashboard/categorias">Categorías</a>
   <a routerLink="/dashboard/proveedores">Proveedores</a>
 
-  <!-- 🔥 AGREGADO -->
+   🔥 AGREGADO 
   <a routerLink="/dashboard/compras">Compras</a>
 
   <a routerLink="/dashboard/pos">POS</a>
@@ -14,6 +15,34 @@
   <button style="margin-left:auto;" (click)="logout()">
     Cerrar sesión
   </button>
+</nav>
+
+<router-outlet></router-outlet>
+-->
+
+<nav style="padding: 1rem; background: #f3f3f3; display:flex; gap:1rem;">
+  
+  <a routerLink="/dashboard">Inicio</a>
+
+  <!-- ADMIN (1) y ALMACENERO (3) -->
+  <a *ngIf="rol == 1 || rol == 3" routerLink="/dashboard/productos">Productos</a>
+  <a *ngIf="rol == 1 || rol == 3" routerLink="/dashboard/categorias">Categorías</a>
+  <a *ngIf="rol == 1 || rol == 3 || rol == 4" routerLink="/dashboard/proveedores">Proveedores</a>
+
+  <!-- COMPRAS (4) -->
+  <a *ngIf="rol == 1 || rol == 4" routerLink="/dashboard/compras">Compras</a>
+
+  <!-- CAJERO (2) -->
+  <a *ngIf="rol == 1 || rol == 2" routerLink="/dashboard/pos">POS</a>
+  <a *ngIf="rol == 1 || rol == 2" routerLink="/dashboard/ventas">Ventas</a>
+
+  <!-- CLIENTES: ADMIN (1), CAJERO (2), GERENTE (5) -->
+  <a *ngIf="rol == 1 || rol == 2 || rol == 5" routerLink="/dashboard/clientes">Clientes</a>
+
+  <!-- CONFIGURACIÓN → sólo ADMIN (1) -->
+  <a *ngIf="rol == 1" routerLink="/dashboard/usuarios">Usuarios</a>
+
+  <button style="margin-left:auto;" (click)="logout()">Cerrar sesión</button>
 </nav>
 
 <router-outlet></router-outlet>
