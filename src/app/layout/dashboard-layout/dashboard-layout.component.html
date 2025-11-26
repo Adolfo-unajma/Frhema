@@ -1,0 +1,15 @@
+<nav style="padding: 1rem; background: #f3f3f3; display:flex; gap:1rem;">
+  <a routerLink="/dashboard">Inicio</a>
+  <a routerLink="/dashboard/productos">Productos</a>
+  <a routerLink="/dashboard/categorias">Categorías</a>
+  <a routerLink="/dashboard/proveedores">Proveedores</a>
+  <a routerLink="/dashboard/pos">POS</a>
+  <a routerLink="/dashboard/ventas">Ventas</a>
+  <a routerLink="/dashboard/clientes">Clientes</a>
+
+  <button style="margin-left:auto;" (click)="logout()">
+    Cerrar sesión
+  </button>
+</nav>
+
+<router-outlet></router-outlet>

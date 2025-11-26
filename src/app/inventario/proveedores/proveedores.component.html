@@ -1,0 +1,58 @@
+<h2>Gestión de Proveedores</h2>
+
+<button (click)="nuevoProveedor()">➕ Nuevo Proveedor</button>
+
+<!-- FORMULARIO -->
+<div style="margin-top:20px; border:1px solid #ccc; padding:1rem;">
+  <h3>{{ modoEdicion ? 'Editar Proveedor' : 'Nuevo Proveedor' }}</h3>
+
+  <form (ngSubmit)="guardarProveedor()">
+
+    <label>Nombre:</label>
+    <input type="text" [(ngModel)]="proveedor.nombre" name="nombre" required />
+
+    <label>Contacto:</label>
+    <input type="text" [(ngModel)]="proveedor.contacto" name="contacto" />
+
+    <label>Teléfono:</label>
+    <input type="text" [(ngModel)]="proveedor.telefono" name="telefono" />
+
+    <label>Dirección:</label>
+    <input type="text" [(ngModel)]="proveedor.direccion" name="direccion" />
+
+    <button type="submit">
+      {{ modoEdicion ? 'Actualizar' : 'Registrar' }}
+    </button>
+
+  </form>
+</div>
+
+<hr />
+
+<!-- TABLA -->
+<table border="1" width="100%" style="margin-top:20px">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Contacto</th>
+      <th>Teléfono</th>
+      <th>Dirección</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let p of proveedores">
+      <td>{{ p.id_proveedor }}</td>
+      <td>{{ p.nombre }}</td>
+      <td>{{ p.contacto }}</td>
+      <td>{{ p.telefono }}</td>
+      <td>{{ p.direccion }}</td>
+      <td>
+        <button (click)="editarProveedor(p)">✏️ Editar</button>
+        <button (click)="eliminarProveedor(p.id_proveedor!)">🗑️ Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

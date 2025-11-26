@@ -1,0 +1,48 @@
+<h2>Gestión de Categorías</h2>
+
+<button (click)="nuevaCategoria()">➕ Nueva Categoría</button>
+
+<!-- FORMULARIO -->
+<div style="margin-top:20px; border:1px solid #ccc; padding:1rem;" *ngIf="categoria">
+  <h3>{{ modoEdicion ? 'Editar Categoría' : 'Nueva Categoría' }}</h3>
+
+  <form (ngSubmit)="guardarCategoria()">
+
+    <label>Nombre:</label>
+    <input type="text" [(ngModel)]="categoria.nombre" name="nombre" required />
+
+    <label>Descripción:</label>
+    <input type="text" [(ngModel)]="categoria.descripcion" name="descripcion" />
+
+    <button type="submit">
+      {{ modoEdicion ? 'Actualizar' : 'Crear' }}
+    </button>
+
+  </form>
+</div>
+
+<hr />
+
+<!-- TABLA -->
+<table border="1" width="100%" style="margin-top:20px">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Descripción</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let c of categorias">
+      <td>{{ c.id_categoria }}</td>
+      <td>{{ c.nombre }}</td>
+      <td>{{ c.descripcion }}</td>
+      <td>
+        <button (click)="editarCategoria(c)">✏️ Editar</button>
+        <button (click)="eliminarCategoria(c.id_categoria!)">🗑️ Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

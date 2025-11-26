@@ -1,0 +1,127 @@
+<h2>Gestión de Productos</h2>
+
+<button (click)="nuevoProducto()">➕ Nuevo Producto</button>
+
+<!-- FORMULARIO -->
+<div style="margin-top:20px; border:1px solid #ccc; padding:1rem;" *ngIf="producto">
+  <h3>{{ modoEdicion ? 'Editar Producto' : 'Nuevo Producto' }}</h3>
+
+  <form (ngSubmit)="guardarProducto()">
+
+    <!-- CODIGO -->
+    <label>Código:</label>
+    <input type="text" [(ngModel)]="producto.codigo" name="codigo" required />
+
+    <!-- NOMBRE -->
+    <label>Nombre:</label>
+    <input type="text" [(ngModel)]="producto.nombre" name="nombre" required />
+
+    <!-- DESCRIPCIÓN -->
+    <label>Descripción:</label>
+    <input type="text" [(ngModel)]="producto.descripcion" name="descripcion" />
+
+    <!-- CATEGORIA -->
+    <label>Categoría:</label>
+    <select [(ngModel)]="producto.id_categoria" name="id_categoria">
+      <option [ngValue]="null">-- Seleccione --</option>
+      <option *ngFor="let c of categorias" [ngValue]="c.id_categoria">
+        {{ c.nombre }}
+      </option>
+    </select>
+
+    <!-- PROVEEDOR -->
+    <label>Proveedor:</label>
+    <select [(ngModel)]="producto.id_proveedor" name="id_proveedor">
+      <option [ngValue]="null">-- Seleccione --</option>
+      <option *ngFor="let p of proveedores" [ngValue]="p.id_proveedor">
+        {{ p.nombre }}
+      </option>
+    </select>
+
+    <!-- UNIDAD -->
+    <label>Unidad de medida:</label>
+    <input type="text" [(ngModel)]="producto.unidad_medida" name="unidad_medida" />
+
+    <!-- STOCK -->
+    <label>Stock actual:</label>
+    <input type="number" [(ngModel)]="producto.stock_actual" name="stock_actual" />
+
+    <label>Stock mínimo:</label>
+    <input type="number" [(ngModel)]="producto.stock_minimo" name="stock_minimo" />
+
+    <!-- PRECIOS -->
+    <label>Precio unitario:</label>
+    <input type="number" step="0.01" [(ngModel)]="producto.precio_unitario" name="precio_unitario" />
+
+    <label>Precio por mayor:</label>
+    <input type="number" step="0.01" [(ngModel)]="producto.precio_mayor" name="precio_mayor" />
+
+    <!-- CADUCIDAD -->
+    <label>
+      <input type="checkbox" [(ngModel)]="producto.tiene_caducidad" name="tiene_caducidad" />
+      ¿Tiene caducidad?
+    </label>
+
+    <div *ngIf="producto.tiene_caducidad">
+      <label>Fecha de vencimiento:</label>
+      <input type="date" [(ngModel)]="producto.fecha_vencimiento" name="fecha_vencimiento" />
+    </div>
+
+    <!-- GARANTÍA -->
+    <label>
+      <input type="checkbox" [(ngModel)]="producto.tiene_garantia" name="tiene_garantia" />
+      ¿Tiene garantía?
+    </label>
+
+    <div *ngIf="producto.tiene_garantia">
+      <label>Meses garantía:</label>
+      <input type="number" [(ngModel)]="producto.meses_garantia" name="meses_garantia" />
+    </div>
+
+    <button type="submit">{{ modoEdicion ? 'Actualizar' : 'Crear' }}</button>
+
+  </form>
+</div>
+
+<hr />
+
+<!-- TABLA -->
+<table border="1" width="100%" style="margin-top:20px">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Código</th>
+      <th>Nombre</th>
+      <th>Categoría</th>
+      <th>Proveedor</th>
+      <th>Stock</th>
+      <th>Precio</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let p of productos">
+      <td>{{ p.id_producto }}</td>
+      <td>{{ p.codigo }}</td>
+      <td>{{ p.nombre }}</td>
+
+      <!-- Mostrar nombre real -->
+      <td>{{ getCategoriaNombre(p.id_categoria ?? null) }}</td>
+      <td>{{ getProveedorNombre(p.id_proveedor ?? null) }}</td>
+
+      <!-- Stock -->
+      <td [style.color]="p.stock_actual <= p.stock_minimo ? 'red' : 'black'">
+        {{ p.stock_actual }}
+      </td>
+
+      <!-- Precio -->
+      <td>S/. {{ p.precio_unitario }}</td>
+
+      <td>
+        <button (click)="editarProducto(p)">✏️ Editar</button>
+        <button (click)="eliminarProducto(p.id_producto!)">🗑️ Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
