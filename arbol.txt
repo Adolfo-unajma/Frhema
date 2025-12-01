@@ -1,0 +1,256 @@
+arbol:
+
+
+src/app/
+├── core/
+│   ├── services/
+│   │   ├── auth/
+│   │   │   ├── auth.service.ts
+│   │   │   └── supabase.client.ts
+│   │   │
+│   │   ├── compras/
+│   │   │   └── compras.service.ts
+│   │   │
+│   │   ├── configuracion/
+│   │   │   ├── usuarios.service.ts
+│   │   │   └── roles.service.ts
+│   │   │
+│   │   ├── inventario/
+│   │   │   ├── productos.service.ts
+│   │   │   ├── categorias.service.ts
+│   │   │   └── proveedores.service.ts
+│   │   │
+│   │   ├── personas/
+│   │   │   └── clientes.service.ts
+│   │   │
+│   │   └── ventas/
+│   │       └── ventas.service.ts
+│   │
+│   ├── guards/
+│   │   ├── auth.guard.ts
+│   │   └── role.guard.ts
+│   │
+│   ├── models/
+│   │   ├── producto.model.ts
+│   │   ├── categoria.model.ts
+│   │   ├── proveedor.model.ts
+│   │   ├── cliente.model.ts
+│   │   ├── usuario.model.ts
+│   │   └── rol.model.ts
+│   │
+│   └── utils/
+│       └── helpers.ts
+│
+├── auth/
+│   ├── login/
+│   │   ├── login.component.ts
+│   │   └── login.component.html
+│   └── registro/
+│       ├── registro.component.ts
+│       └── registro.component.html
+│
+├── layout/
+│   ├── dashboard-layout/
+│   │   ├── dashboard-layout.component.ts
+│   │   ├── dashboard-layout.component.html
+│   │   └── dashboard-layout.component.css
+│   │
+│   └── dashboard/
+│       ├── dashboard.component.ts
+│       ├── dashboard.component.html
+│       └── dashboard.component.css
+│
+├── inventario/
+│   ├── productos/
+│   ├── categorias/
+│   └── proveedores/
+│
+├── ventas/
+│   ├── pos/
+│   └── historial/
+│
+├── compras/
+│   └── compras-list/
+│
+├── clientes/
+│   └── clientes-list/
+│
+└── configuracion/
+    ├── usuarios/
+    └── roles/
+
+
+
+sql:
+ -- ROLES DEL SISTEMA
+create table if not exists roles (
+  id_rol serial primary key,
+  nombre_rol text unique not null  -- ADMIN, CAJERO, ALMACENERO
+);
+
+-- PERFIL DE USUARIO (EXTIENDE auth.users)
+create table if not exists usuarios (
+  id_usuario uuid primary key references auth.users(id) on delete cascade,
+  nombre_usuario text unique not null,
+  id_rol int references roles(id_rol),
+  nombre text,
+  apellido text
+);
+
+-- CATEGORÍAS
+create table if not exists categorias (
+  id_categoria serial primary key,
+  nombre text not null,
+  descripcion text
+);
+
+-- PROVEEDORES
+create table if not exists proveedores (
+  id_proveedor serial primary key,
+  nombre text not null,
+  contacto text,
+  telefono text,
+  direccion text
+);
+
+-- CLIENTES
+create table if not exists clientes (
+  id_cliente serial primary key,
+  nombre text not null,
+  tipo text, -- natural / empresa
+  documento text,
+  telefono text,
+  direccion text
+);
+
+-- PRODUCTOS
+create table if not exists productos (
+  id_producto serial primary key,
+  codigo text unique not null,
+  nombre text not null,
+  descripcion text,
+  id_categoria int references categorias(id_categoria) on delete set null,
+  id_proveedor int references proveedores(id_proveedor) on delete set null,
+  unidad_medida text not null,
+  stock_actual numeric default 0,
+  stock_minimo numeric default 0,
+  precio_unitario numeric(10,2) not null,
+  precio_mayor numeric(10,2),
+  tiene_caducidad boolean default false,
+  fecha_vencimiento date,
+  tiene_garantia boolean default false,
+  meses_garantia int
+);
+
+-- COMPRAS
+create table if not exists compras (
+  id_compra serial primary key,
+  id_proveedor int not null references proveedores(id_proveedor),
+  id_usuario uuid not null references auth.users(id),
+  fecha timestamp default now(),
+  nro_documento text,
+  total numeric(12,2)
+);
+
+create table if not exists detalle_compras (
+  id_detalle_compra serial primary key,
+  id_compra int not null references compras(id_compra) on delete cascade,
+  id_producto int not null references productos(id_producto),
+  cantidad numeric not null,
+  costo_unitario numeric(10,2) not null,
+  subtotal numeric generated always as (cantidad * costo_unitario) stored
+);
+
+-- VENTAS
+create table if not exists ventas (
+  id_venta serial primary key,
+  fecha timestamp default now(),
+  id_cliente int references clientes(id_cliente),
+  id_usuario uuid not null references auth.users(id),
+  tipo_comprobante text,
+  nro_comprobante text,
+  metodo_pago text,
+  total numeric(12,2)
+);
+
+create table if not exists detalle_ventas (
+  id_detalle_venta serial primary key,
+  id_venta int not null references ventas(id_venta) on delete cascade,
+  id_producto int not null references productos(id_producto),
+  cantidad numeric not null,
+  precio_unitario numeric(10,2) not null,
+  descuento numeric(10,2) default 0,
+  subtotal numeric generated always as ((cantidad * precio_unitario) - descuento) stored
+);
+
+-- TRIGGER: AUMENTAR STOCK AL COMPRAR
+create or replace function trg_aumentar_stock_fn()
+returns trigger as $$
+begin
+  update productos
+  set stock_actual = stock_actual + new.cantidad
+  where id_producto = new.id_producto;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_aumentar_stock on detalle_compras;
+create trigger trg_aumentar_stock
+after insert on detalle_compras
+for each row
+execute function trg_aumentar_stock_fn();
+
+-- TRIGGER: DISMINUIR STOCK AL VENDER
+create or replace function trg_disminuir_stock_fn()
+returns trigger as $$
+begin
+  update productos
+  set stock_actual = stock_actual - new.cantidad
+  where id_producto = new.id_producto;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_disminuir_stock on detalle_ventas;
+create trigger trg_disminuir_stock
+after insert on detalle_ventas
+for each row
+execute function trg_disminuir_stock_fn();
+
+
+create table if not exists movimientos_stock (
+  id_movimiento serial primary key,
+  id_producto int not null references productos(id_producto),
+  tipo text not null, -- 'COMPRA' | 'VENTA'
+  cantidad numeric not null,
+  stock_antes numeric,
+  stock_despues numeric,
+  referencia text, -- "Venta 123", "Compra 45"
+  fecha timestamp default now()
+);
+
+insert into roles (nombre_rol) values
+('ADMIN'),
+('CAJERO'),
+('ALMACENERO'),
+('COMPRAS'),
+('GERENTE')
+on conflict (nombre_rol) do nothing;
+
+select * from productos order by id_producto desc;
+
+
+alter table proveedores
+add column if not exists tipo_documento text;
+
+alter table proveedores
+add column if not exists numero_documento text;
+
+alter table proveedores
+add column if not exists correo text;
+
+alter table proveedores
+add column if not exists activo boolean default true;
+
+ALTER TABLE proveedores RENAME COLUMN tipoDocumento TO tipo_documento;
+ALTER TABLE proveedores RENAME COLUMN numeroDocumento TO numero_documento;
