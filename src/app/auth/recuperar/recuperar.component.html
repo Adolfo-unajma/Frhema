@@ -1,0 +1,39 @@
+<div class="max-w-md mx-auto bg-white p-6 shadow rounded mt-10">
+
+  <h2 class="text-xl font-semibold mb-4">Recuperar contraseña</h2>
+
+  <p class="text-sm text-gray-600 mb-3">
+    Ingresa tu correo y te enviaremos un enlace para cambiar tu contraseña.
+  </p>
+
+  <div *ngIf="mensaje" class="p-3 bg-green-100 text-green-700 rounded mb-4">
+    {{ mensaje }}
+  </div>
+
+  <div *ngIf="error" class="p-3 bg-red-100 text-red-700 rounded mb-4">
+    {{ error }}
+  </div>
+
+  <form (ngSubmit)="enviar()">
+
+    <label class="font-medium">Correo electrónico</label>
+    <input
+      type="email"
+      class="w-full border p-2 rounded mb-4"
+      [(ngModel)]="email"
+      name="email"
+      required
+    />
+
+    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full">
+      Enviar enlace de recuperación
+    </button>
+
+  </form>
+
+  <p class="mt-4 text-[0.9rem] text-center text-gray-600">
+        <a routerLink="/" class="text-blue-600 font-semibold no-underline hover:text-blue-800">
+          Regresar
+        </a>
+      </p>
+</div>

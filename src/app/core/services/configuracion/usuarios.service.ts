@@ -47,4 +47,25 @@ export class UsuariosService {
     if (error) throw error;
     return true;
   }
+
+  // ============================
+  // CREAR PERFIL COMPLETO
+  // ============================
+  async crearPerfil(data: {
+    id_usuario: string;
+    nombre_usuario: string;
+    nombre: string;
+    apellido: string;
+    id_rol: number | null;
+  }) {
+
+    const { error } = await this.supabase.client
+      .from(this.TABLE)
+      .insert(data);
+
+    if (error) throw error;
+
+    return true;
+  }
+
 }

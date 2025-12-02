@@ -140,6 +140,9 @@ export class AuthService {
       throw new Error("No se pudo crear el usuario en auth.");
     }
 
+
+    
+
     // 🔥 INSERTAR PERFIL EN TABLA usuarios
     const { error: e2 } = await this.supabaseService.client
       .from("usuarios")
@@ -155,6 +158,29 @@ export class AuthService {
 
     return data;
   }
+
+  // ============================
+  // REGISTER INTERNO (solo admin)
+  // ============================
+  async registerInternal(email: string, password: string) {
+
+    const { data, error } = await this.supabaseService.client.auth.signUp({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    const user = data.user;
+
+    if (!user) {
+      throw new Error("No se pudo crear el usuario en auth.");
+    }
+
+    // Solo devolvemos el objeto usuario para luego completar desde UsuariosService
+    return { user };
+  }
+
 
 
   // ============================
